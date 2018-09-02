@@ -27,7 +27,7 @@ class BatchedInput(
 
 def _parse_csv(line):
     cols_types = [['']] * 3
-    columns = tf.decode_csv(line, record_defaults=cols_types, field_delim='\t')
+    columns = tf.decode_csv(line, record_defaults=cols_types, field_delim='\t',  use_quote_delim=False)
     return columns
 
 

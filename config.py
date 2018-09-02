@@ -2,7 +2,7 @@
 # coding: utf-8
 # @Author: lapis-hong
 # @Date  : 2018/8/6
-"""This module contains model hyperparameters using tf.flags."""
+"""This module contains model hyper parameters using tf.flags."""
 import tensorflow as tf
 
 # data params
@@ -33,7 +33,7 @@ tf.flags.DEFINE_integer("num_layers", 2, "num of hidden layers [2]")
 tf.flags.DEFINE_integer("hidden_units", 141, "num of hidden units [141]")
 
 # training params
-tf.flags.DEFINE_integer("batch_size", 50, "train batch size [20]")
+tf.flags.DEFINE_integer("batch_size", 32, "train batch size [20]")
 tf.flags.DEFINE_integer("max_epoch", 10, "max epoch [10]")
 tf.flags.DEFINE_float("lr", 0.002, "init learning rate [adam: 0.002, sgd: 1.1]")
 tf.flags.DEFINE_integer("lr_decay_epoch", 3, "learning rate decay interval [3]")
