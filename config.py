@@ -6,11 +6,11 @@
 import tensorflow as tf
 
 # data params
-tf.flags.DEFINE_string("train_file", 'data/WikiQA/train', "train file")
-tf.flags.DEFINE_string("test_file", None, "test file")
-tf.flags.DEFINE_string("vocab_file", 'data/WikiQA/vocab', "vocab file")
+tf.flags.DEFINE_string("train_file", 'data/HT/train', "train file")
+tf.flags.DEFINE_string("test_file", 'data/HT/test', "test file")
+tf.flags.DEFINE_string("vocab_file", 'data/HT/vocab', "vocab file")
 tf.flags.DEFINE_string("embed_file", None, "embed file")
-tf.flags.DEFINE_string("predict_file", 'data/WikiQA/pred', "predict file")
+tf.flags.DEFINE_string("predict_file", 'data/HT/pred', "predict file")
 tf.flags.DEFINE_string("output_file", 'result.txt', "output file")
 
 tf.flags.DEFINE_integer("question_max_len", 40, "max question length [40]")

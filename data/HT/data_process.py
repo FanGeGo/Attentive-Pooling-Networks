@@ -5,6 +5,8 @@
 import sys
 import json
 import random
+import re
+from collections import Counter
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -79,11 +81,126 @@ def post_process(infile, outfile):
                 fo.write('\t'.join(line) + '\n')
 
 
+def parse_all_q():
+    all_q = {}
+    for line in open("all_q_list.csv"):
+        q_id, q = line.strip().split(",", 1)
+        all_q[q_id] = q
+    return all_q
+
+
+def gen_selected_triple():
+    q_dic = parse_all_q()
+    positive = []
+    negative = []
+    with open("origin", "w") as fo:
+        for idx, line in enumerate(open("selected_qa_pair.csv")):
+            q_id, a_id, vote, a = line.strip().split(",", 3)
+            a = a.replace("\t", " ")
+            try:
+                q = q_dic[q_id].replace("\t", " ")
+
+            except KeyError:
+                pass
+            if idx % 2 == 0:
+                positive.append([q, a])
+            else:
+                negative.append(a)
+        for (q, a_pos), a_neg in zip(positive, negative):
+            fo.write("\t".join([q, a_pos, a_neg]) + "\n")
+
+
+def gen_pred_pair():
+    q_dic = parse_all_q()
+    with open("pred", "w") as fo:
+        for line in open("test_qa.csv"):
+            q_id, a_id, vote, a = line.strip().split(",", 3)
+            a = a.replace("\t", " ")
+            q = q_dic[q_id].replace("\t", " ")
+            fo.write("\t".join([q, a]) + "\n")
+
+
+def cal_acc():
+    q_list = []
+    for line in open("test_qa.csv"):
+        q_id, a_id, vote, a = line.strip().split(",", 3)
+        q_list.append(q_id)
+    score_list = []
+    for line in open("result.txt"):
+        score_list.append(float(line.strip()))
+
+    score_dic = {}
+    for q_id, score in zip(q_list, score_list):
+        if q_id not in score_dic:
+            score_dic[q_id] = [score]
+        else:
+            score_dic[q_id].append(score)
+    cnt = 0
+    for q_id, scores in score_dic.items():
+        if max(scores) == scores[0]:
+            cnt += 1
+    acc = float(cnt) / len(score_dic)
+    return acc
+
+
+
+
+
+
+def train_test_split(train_ratio=0.9):
+    with open("train", "w") as f1, open("test", "w") as f2:
+        for ix, line in enumerate(open("origin")):
+            if random.random() < train_ratio:
+                f1.writelines(line)
+            else:
+                f2.writelines(line)
+
+
+def clean_str(string):
+    string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
+    string = re.sub(r"\'s", " \'s", string)
+    string = re.sub(r"\'ve", " \'ve", string)
+    string = re.sub(r"n\'t", " n\'t", string)
+    string = re.sub(r"\'re", " \'re", string)
+    string = re.sub(r"\'d", " \'d", string)
+    string = re.sub(r"\'ll", " \'ll", string)
+    string = re.sub(r",", " , ", string)
+    string = re.sub(r"!", " ! ", string)
+    string = re.sub(r"\(", " \( ", string)
+    string = re.sub(r"\)", " \) ", string)
+    string = re.sub(r"\?", " \? ", string)
+    string = re.sub(r"\s{2,}", " ", string)
+    return string.strip().lower()
+
+
+def build_vocab(min_count=3):
+    words = []
+    for line in open("origin"):
+        line = clean_str(line)
+        line = line.strip().split(' ')
+        for word in line:
+            words.append(word)
+    counter = Counter(words)
+    word_count = counter.most_common(len(words))  # sort by word freq.
+    vocab = ['PAD', 'UNK']
+    vocab += [w[0] for w in word_count if w[1] >= min_count]
+    with open("vocab", "w") as f:
+        for i, word in enumerate(vocab):
+            f.write(word + "\n")
+
+
 if __name__ == '__main__':
     # gen_pair("Data2018/Set1/question.json", "Data2018/Set1/answer.json", "Data2018/Set1/pair")
     # gen_triple("Set1/question.json", "Set1/answer.json", "Set1/triple")
     # post_process("Set1/triple", "Set1/train")
-    gen_pred("Set2/question.json", "Set2/answer.json", "pred")
+    # gen_pred("Set2/question.json", "Set2/answer.json", "pred")
+    # q_dic = parse_all_q()
+    # gen_selected_triple()
+    # train_test_split()
+    # build_vocab(3)
+    # gen_pred_pair()
+    acc = cal_acc()
+    print(acc)
 
 
 
